@@ -1,28 +1,16 @@
-#ifndef RAYTRACER_RAYTRACER_HPP
-#define RAYTRACER_RAYTRACER_HPP
+#ifndef EOS_RAYTRACER_HPP
+#define EOS_RAYTRACER_HPP
+
+#include <vector>
 
 #include <Eigen/Core>
 
-namespace raytracer
+namespace eos
 {
     typedef Eigen::Matrix<unsigned char, 3, 1> pixel;
 
-    struct sphere {
-        Eigen::Vector3f centre;
-        float radius;
-        pixel colour;
-        float reflectivity, specvalue, specpower;
-
-        sphere() :
-            radius(0.0),
-            reflectivity(1.0),
-            specvalue(0.0),
-            specpower(0.0)
-        {
-        }
-    };
-
-    struct lamp {
+    struct lamp
+    {
         Eigen::Vector3f centre;
         float brightness;
 
@@ -30,6 +18,11 @@ namespace raytracer
             brightness(1.0)
         {
         }
+    };
+
+    struct ray
+    {
+        Eigen::Vector3f start, direction;
     };
 }
 
