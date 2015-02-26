@@ -1,6 +1,9 @@
 #include "main.hpp"
 
+#include <fstream>
 #include <iostream>
+
+#include "commandline/commandline.hpp"
 
 #include "image.hpp"
 #include "ray.hpp"
@@ -8,15 +11,36 @@
 #include "sphere.hpp"
 #include "triangle.hpp"
 
-int eos::main(int argc, char **argv)
+int eos::main(int argc, const char **argv)
 {
+    std::string outfile;
+    bool show_help = false;
+    std::vector<commandline::option> cmd_options{
+        commandline::parameter("outfile", outfile, "Output filename"),
+        commandline::flag("help", show_help, "Show this help message")
+    };
+    commandline::parse(argc, argv, cmd_options);
+
+    if(show_help)
+    {
+        commandline::print(argc, argv, cmd_options);
+        return 0;
+    }
+
+    if(outfile == "")
+    {
+        std::cerr << "error: output file must be specified" << std::endl;
+        commandline::print(argc, argv, cmd_options);
+        return 1;
+    }
+
     scene s;
     {
         std::unique_ptr<sphere> o(new sphere);
-        o->set_centre({0, 100, 0});
-        o->set_radius(250);
-        o->set_colour({1, 1, 1});
-        //s.add(std::move(o));
+        o->set_centre({0, 200, 0});
+        o->set_radius(190);
+        o->set_colour({0, 1, 0});
+        s.add(std::move(o));
     }
 
     s.add(
@@ -32,9 +56,9 @@ int eos::main(int argc, char **argv)
     s.add(
         std::unique_ptr<triangle>(
             new triangle(
-                Eigen::Vector3d(0, 100, 250),
-                Eigen::Vector3d(0, 100, 0),
-                Eigen::Vector3d(150, 100, 0)
+                Eigen::Vector3d(0, 0, 250),
+                Eigen::Vector3d(0, 0, 0),
+                Eigen::Vector3d(150, 0, 0)
                 )
             )
         );
@@ -42,33 +66,41 @@ int eos::main(int argc, char **argv)
     s.add(
         std::unique_ptr<triangle>(
             new triangle(
-                Eigen::Vector3d(-150, 200, -250),
-                Eigen::Vector3d(-150, 200, 0),
-                Eigen::Vector3d(-350, 200, 0)
+                Eigen::Vector3d(-150, 0, -250),
+                Eigen::Vector3d(-150, 0, 0),
+                Eigen::Vector3d(-350, 0, 0)
                 )
             )
         );
 
+    // Strong light from above-left illuminates the scene.
     {
         lamp l;
         l.centre = {-200, -200, -200};
         l.brightness = 0.8;
         s.add(l);
     }
-    //{
-        //lamp l;
-        //l.centre = {0, -200, 0};
-        //l.brightness = 0.2;
-        //s.add(l);
-    //}
-    // TODO: use quarternion
-    ray camera({0, -1, 0}, {0, 1, 0});
+    // Weak light from the camera illuminates everything the camera can see.
+    {
+        lamp l;
+        l.centre = {0, -200, 0};
+        l.brightness = 0.3;
+        s.add(l);
+    }
 
     image output(800, 600);
     for(int ix = 0; ix < output.width(); ++ix)
     {
         for(int iy = 0; iy < output.height(); ++iy)
         {
+            try
+            {
+                if(ix == 265 && iy == 162)
+                    throw std::runtime_error("break");
+            }
+            catch(const std::exception&)
+            {
+            }
             Eigen::Vector3d start =
                 {
                     -(float(ix) - output.width()/2),
@@ -83,11 +115,12 @@ int eos::main(int argc, char **argv)
         }
     }
 
-    std::cout << output;
+    std::ofstream os(outfile);
+    os << output;
     return 0;
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
     return eos::main(argc, argv);
 }

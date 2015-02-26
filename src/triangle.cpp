@@ -24,31 +24,38 @@ eos::triangle::triangle(
 
 bool eos::triangle::intersects(const ray& light_ray) const
 {
+    // Check that the ray intersects the triangle by checking that it is on the
+    // correct side of the three edges of the triangle.
+
     const auto p0(m_points.col(0));
     const auto p1(m_points.col(1));
     const auto p2(m_points.col(2));
 
+    // Parametric equation of the ray.
     // t = -( ((o-p).n) / (d.n) )
+    // Point of intersection between the ray and the triangle's plane.
     // x = o + td
 
-    // Normal from the front.
+    // Normal from the 'front' of the triangle; the points are anti-clockwise
+    // around the normal.
     auto n = (p1 - p0).cross(p2 - p0);
-    // p0 could be any vertex
-    auto t = -(
+    // p0 is used as any point on the triangle's plane.
+    double t = -(
             (light_ray.origin()-p0).dot(n) /
             light_ray.direction().dot(n)
             );
     // x is the point where the light ray intersects the plane.
     const Eigen::Vector3d x = light_ray.origin() + t*light_ray.direction();
 
+    // Check that x is on the correct side of each edge.
     // (p1 - p0) x (x - p0) . n >= 0
     // (p2 - p1) x (x - p1) . n >= 0
     // (p0 - p2) x (x - p2) . n >= 0
 
     return (
-            ((p1 - p0).cross(x - p0)).dot(n) > -01 &&
-            ((p2 - p1).cross(x - p1)).dot(n) > -01 &&
-            ((p0 - p2).cross(x - p2)).dot(n) > -01
+            ((p1 - p0).cross(x - p0)).dot(n) >= -0.0001 &&
+            ((p2 - p1).cross(x - p1)).dot(n) >= -0.0001 &&
+            ((p0 - p2).cross(x - p2)).dot(n) >= -0.0001
            );
 }
 

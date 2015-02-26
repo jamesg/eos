@@ -22,6 +22,7 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
         return !s->intersects(view_ray);
     };
 
+    // Set up a view onto all shapes in the scene.
     std::vector<const primitive*> primitives;
     std::transform(
             m_primitives.begin(),
@@ -31,6 +32,7 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
                 return p.get();
             }
             );
+    // Remove shapes that are not on the line of the view ray.
     primitives.erase(
             std::remove_if(primitives.begin(), primitives.end(), not_in_line),
             primitives.end()
@@ -39,9 +41,10 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
     if(primitives.size() == 0)
         return background_colour();
 
+    // Sort primitives on the view ray by distance from the camera.
     std::sort(primitives.begin(), primitives.end(), cmp);
 
-    pixel out = background_colour();
+    pixel out({0, 0, 0});
 
     const primitive *closest = primitives.at(0);
     auto intersection = closest->closest_intersection(view_ray);
@@ -51,7 +54,8 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
         // lamp -> intersection
         ray light_ray(current_lamp.centre, intersection - current_lamp.centre);
 
-        auto in_line = [&closest, light_ray](
+        // Check if primitive 'shape' casts a shadow on 'closest'.
+        auto in_ray = [&closest, light_ray](
                 const std::unique_ptr<primitive>& shape
                 )
         {
@@ -65,7 +69,7 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
                     shape->closest_intersection(light_ray) -
                     light_ray.origin()
                     ).norm();
-            return (lamp_closest < lamp_shape);
+            return (lamp_closest > lamp_shape);
         };
 
         // Find objects along the line from the lamp to the object.  If there
@@ -74,7 +78,7 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
             std::find_if(
                 m_primitives.begin(),
                 m_primitives.end(),
-                in_line
+                in_ray
                 ) == m_primitives.end()
           )
             out += closest->diffuse(current_lamp, view_ray);

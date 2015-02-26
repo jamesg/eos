@@ -14,5 +14,5 @@ TODO
 * Reflections.
 * Load shapes from JSON files.
 * Implement rotation, movable camera, make focal length adjustable.
-* Refactoring - colour attributes...
+* Refactoring - colour attributes... use of 'reference to pointer' in places...
 

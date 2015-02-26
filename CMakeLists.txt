@@ -7,6 +7,7 @@ find_package(Eigen3)
 set(CMAKE_CXX_FLAGS "-std=c++0x")
 include_directories("/usr/include/eigen3")
 
+include_directories("commandline/include")
 include_directories("src")
 
 file(GLOB raytracer_lib_sources src/*.cpp)
