@@ -11,11 +11,16 @@ namespace eos
     {
     public:
         image(int width, int height);
+
+        int width() const;
+        int height() const;
+
         void set(Eigen::Vector2i loc, pixel p);
-        void operator<<(std::ostream&) const;
+        friend std::ostream& operator<<(std::ostream&, const image&);
     private:
         Eigen::Matrix<pixel, Eigen::Dynamic, Eigen::Dynamic> m_data;
     };
+    std::ostream& operator<<(std::ostream&, const eos::image&);
 }
 
 #endif

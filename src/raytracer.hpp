@@ -7,11 +7,11 @@
 
 namespace eos
 {
-    typedef Eigen::Matrix<unsigned char, 3, 1> pixel;
+    typedef Eigen::Vector3d pixel;
 
     struct lamp
     {
-        Eigen::Vector3f centre;
+        Eigen::Vector3d centre;
         float brightness;
 
         lamp() :
@@ -20,10 +20,6 @@ namespace eos
         }
     };
 
-    struct ray
-    {
-        Eigen::Vector3f start, direction;
-    };
 }
 
 #endif

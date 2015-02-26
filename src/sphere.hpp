@@ -1,27 +1,31 @@
 #ifndef EOS_SPHERE_HPP
 #define EOS_SPHERE_HPP
 
+#include "primitive.hpp"
 #include "raytracer.hpp"
 
 namespace eos
 {
-    struct sphere
+    class sphere : public primitive
     {
-        Eigen::Vector3f centre;
-        float radius;
-        pixel colour;
-        float reflectivity, specvalue, specpower;
+    public:
+        sphere();
 
-        sphere() :
-            radius(1.0),
-            reflectivity(1.0),
-            specvalue(0.0),
-            specpower(0.0)
-        {
-        }
+        void set_centre(Eigen::Vector3d);
+        void set_radius(double r);
 
-        bool intersects(const ray& light_ray) const;
-        Eigen::Vector3f closest_intersection(const ray& light_ray) const;
+        pixel colour() const;
+        void set_colour(const pixel&);
+
+        bool intersects(const ray& light_ray) const override;
+        Eigen::Vector3d
+            closest_intersection(const ray& light_ray) const override;
+        Eigen::Vector3d normal(Eigen::Vector3d) const override;
+    private:
+        Eigen::Vector3d m_centre;
+        double m_radius;
+        pixel m_colour;
+        double m_reflectivity, m_specvalue, m_specpower;
     };
 }
 
