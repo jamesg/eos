@@ -1,3 +1,6 @@
 [submodule "commandline"]
 	path = commandline
 	url = https://github.com/jamesg/commandline.git
+[submodule "hades"]
+	path = hades
+	url = https://github.com/jamesg/hades.git

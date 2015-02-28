@@ -7,6 +7,8 @@ find_package(Eigen3)
 set(CMAKE_CXX_FLAGS "-std=c++0x")
 include_directories("/usr/include/eigen3")
 
+add_subdirectory("hades")
+
 include_directories("commandline/include")
 include_directories("src")
 
@@ -19,4 +21,5 @@ target_link_libraries(raytracer raytracer-lib)
 file(GLOB raytracer_test_sources src/test/*.cpp)
 add_executable(test-raytracer ${raytracer_test_sources})
 target_link_libraries(test-raytracer raytracer-lib)
+add_test(test-raytracer test-raytracer)
 
