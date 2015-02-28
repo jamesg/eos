@@ -7,7 +7,7 @@
 
 eos::pixel eos::scene::background_colour() const
 {
-    return pixel({0, 0, 0});
+    return pixel({1, 1, 1});
 }
 
 eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
