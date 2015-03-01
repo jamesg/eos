@@ -4,18 +4,21 @@
 #include <iostream>
 
 #include "commandline/commandline.hpp"
+#include "styx/list.hpp"
 
 #include "image.hpp"
 #include "ray.hpp"
 #include "scene.hpp"
+#include "scene_file.hpp"
 #include "sphere.hpp"
 #include "triangle.hpp"
 
 int eos::main(int argc, const char **argv)
 {
-    std::string outfile;
+    std::string infile, outfile;
     bool show_help = false;
     std::vector<commandline::option> cmd_options{
+        commandline::parameter("infile", infile, "Input filename"),
         commandline::parameter("outfile", outfile, "Output filename"),
         commandline::flag("help", show_help, "Show this help message")
     };
@@ -27,6 +30,12 @@ int eos::main(int argc, const char **argv)
         return 0;
     }
 
+    if(infile == "")
+    {
+        std::cerr << "error: input file must be specified" << std::endl;
+        commandline::print(argc, argv, cmd_options);
+        return 1;
+    }
     if(outfile == "")
     {
         std::cerr << "error: output file must be specified" << std::endl;
@@ -34,44 +43,7 @@ int eos::main(int argc, const char **argv)
         return 1;
     }
 
-    scene s;
-    {
-        std::unique_ptr<sphere> o(new sphere);
-        o->set_centre({0, 200, 0});
-        o->set_radius(190);
-        o->set_colour({0, 1, 0});
-        s.add(std::move(o));
-    }
-
-    s.add(
-        std::unique_ptr<triangle>(
-            new triangle(
-                Eigen::Vector3d(150, 0, 250),
-                Eigen::Vector3d(150, 0, 0),
-                Eigen::Vector3d(350, 0, 0)
-                )
-            )
-        );
-
-    s.add(
-        std::unique_ptr<triangle>(
-            new triangle(
-                Eigen::Vector3d(0, 0, 250),
-                Eigen::Vector3d(0, 0, 0),
-                Eigen::Vector3d(150, 0, 0)
-                )
-            )
-        );
-
-    s.add(
-        std::unique_ptr<triangle>(
-            new triangle(
-                Eigen::Vector3d(-150, 0, -250),
-                Eigen::Vector3d(-150, 0, 0),
-                Eigen::Vector3d(-350, 0, 0)
-                )
-            )
-        );
+    scene s = scene_file::from_file(infile).get_scene();
 
     // Strong light from above-left illuminates the scene.
     {

@@ -10,10 +10,12 @@ include_directories("/usr/include/eigen3")
 add_subdirectory("hades")
 
 include_directories("commandline/include")
+include_directories("hades/include")
 include_directories("src")
 
 file(GLOB raytracer_lib_sources src/*.cpp)
 add_library(raytracer-lib ${raytracer_lib_sources})
+target_link_libraries(raytracer-lib styx)
 
 add_executable(raytracer "src/raytracer/main.cpp")
 target_link_libraries(raytracer raytracer-lib)

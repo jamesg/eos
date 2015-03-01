@@ -14,11 +14,7 @@ namespace
 }
 
 eos::sphere::sphere() :
-    m_radius(1),
-    m_colour({255, 255, 255}),
-    m_reflectivity(1),
-    m_specvalue(0),
-    m_specpower(0)
+    m_radius(1)
 {
 }
 
@@ -30,16 +26,6 @@ void eos::sphere::set_centre(Eigen::Vector3d centre)
 void eos::sphere::set_radius(double radius)
 {
     m_radius = radius;
-}
-
-eos::pixel eos::sphere::colour() const
-{
-    return m_colour;
-}
-
-void eos::sphere::set_colour(const pixel& colour)
-{
-    m_colour = colour;
 }
 
 bool eos::sphere::intersects(const ray& light_ray) const

@@ -8,8 +8,11 @@ namespace eos
     class triangle : public primitive
     {
     public:
+        triangle();
         triangle(Eigen::Matrix<double, 3, 3>);
         triangle(Eigen::Vector3d, Eigen::Vector3d, Eigen::Vector3d);
+
+        void set_points(Eigen::Matrix3d);
 
         bool intersects(const ray& light_ray) const override;
         Eigen::Vector3d

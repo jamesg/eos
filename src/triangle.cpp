@@ -6,6 +6,10 @@
 
 #include "ray.hpp"
 
+eos::triangle::triangle()
+{
+}
+
 eos::triangle::triangle(Eigen::Matrix<double, 3, 3> points) :
     m_points(points)
 {
@@ -20,6 +24,11 @@ eos::triangle::triangle(
     m_points.col(0) = p1;
     m_points.col(1) = p2;
     m_points.col(2) = p3;
+}
+
+void eos::triangle::set_points(Eigen::Matrix3d points)
+{
+    m_points = points;
 }
 
 bool eos::triangle::intersects(const ray& light_ray) const
