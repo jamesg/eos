@@ -2,8 +2,8 @@
 #define EOS_SPHERE_HPP
 
 #include "coloured.hpp"
+#include "pixel.hpp"
 #include "primitive.hpp"
-#include "raytracer.hpp"
 
 namespace eos
 {
@@ -21,6 +21,7 @@ namespace eos
         Eigen::Vector3d
             closest_intersection(const ray& light_ray) const override;
         Eigen::Vector3d normal(Eigen::Vector3d) const override;
+        void transform(transform_type) override;
     private:
         Eigen::Vector3d m_centre;
         double m_radius;

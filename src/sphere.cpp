@@ -62,3 +62,7 @@ Eigen::Vector3d eos::sphere::normal(Eigen::Vector3d loc) const
     return (loc - m_centre).normalized();
 }
 
+void eos::sphere::transform(transform_type)
+{
+}
+

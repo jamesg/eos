@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-#include "raytracer.hpp"
+#include "pixel.hpp"
 
 namespace eos
 {

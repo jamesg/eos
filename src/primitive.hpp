@@ -3,10 +3,14 @@
 
 #include <memory>
 
-#include "raytracer.hpp"
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
+#include "pixel.hpp"
 
 namespace eos
 {
+    class lamp;
     class ray;
 
     /*!
@@ -16,6 +20,8 @@ namespace eos
     class primitive
     {
     public:
+        typedef Eigen::Transform<double, 3, Eigen::Projective> transform_type;
+
         virtual pixel colour() const;
         /*!
          * \brief Render a point on the surface under diffuse lighting.
@@ -42,6 +48,10 @@ namespace eos
          * closest_intersection.
          */
         virtual Eigen::Vector3d normal(Eigen::Vector3d) const = 0;
+        /*!
+         * \brief Transform the primitive by a transformation matrix.
+         */
+        virtual void transform(transform_type) = 0;
     };
 }
 

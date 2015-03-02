@@ -6,8 +6,10 @@
 
 #include "coloured.hpp"
 #include "material.hpp"
+#include "point_lamp.hpp"
 #include "primitive.hpp"
 #include "scene.hpp"
+#include "soft_lamp.hpp"
 #include "sphere.hpp"
 #include "triangle.hpp"
 
@@ -21,7 +23,32 @@ eos::scene eos::scene_file::get_scene() const
     scene out;
     for(const styx::element& primitive_e : primitives())
         out.add(scene_file::load_primitive(primitive_e));
+    for(const styx::element& lamp_e : lamps())
+        out.add(scene_file::load_lamp(lamp_e));
     return out;
+}
+
+void eos::scene_file::load_common(const styx::object& e, void *p)
+{
+}
+
+std::unique_ptr<eos::lamp> eos::scene_file::load_lamp(
+        const styx::element& e
+        )
+{
+    styx::object o(e);
+
+    std::unique_ptr<lamp> l;
+    if(o.copy_string("type") == "point")
+        l.reset(new point_lamp);
+    if(o.copy_string("type") == "soft")
+        l.reset(new soft_lamp);
+    load_common(o, l.get());
+    l->set_brightness(o.copy_double("brightness"));
+    l->set_centre(
+            {o.copy_double("x"), o.copy_double("y"), o.copy_double("z")}
+            );
+    return std::move(l);
 }
 
 std::unique_ptr<eos::primitive> eos::scene_file::load_primitive(
@@ -38,6 +65,8 @@ std::unique_ptr<eos::primitive> eos::scene_file::load_primitive(
 
     if(!shape)
         throw std::runtime_error("not a shape");
+
+    load_common(o, shape.get());
 
     if(triangle *t = dynamic_cast<triangle*>(shape.get()))
     {
@@ -85,5 +114,10 @@ eos::scene_file::scene_file(const styx::element& e) :
 const styx::list& eos::scene_file::primitives() const
 {
     return get_list("primitives");
+}
+
+const styx::list& eos::scene_file::lamps() const
+{
+    return get_list("lamps");
 }
 

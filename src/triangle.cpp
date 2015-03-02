@@ -103,3 +103,7 @@ Eigen::Vector3d eos::triangle::normal(Eigen::Vector3d) const
     return n.normalized();
 }
 
+void eos::triangle::transform(transform_type)
+{
+}
+

@@ -7,6 +7,7 @@
 #include "styx/list.hpp"
 
 #include "image.hpp"
+#include "lamp.hpp"
 #include "ray.hpp"
 #include "scene.hpp"
 #include "scene_file.hpp"
@@ -45,34 +46,11 @@ int eos::main(int argc, const char **argv)
 
     scene s = scene_file::from_file(infile).get_scene();
 
-    // Strong light from above-left illuminates the scene.
-    {
-        lamp l;
-        l.centre = {-200, -200, -200};
-        l.brightness = 0.8;
-        s.add(l);
-    }
-    // Weak light from the camera illuminates everything the camera can see.
-    {
-        lamp l;
-        l.centre = {0, -200, 0};
-        l.brightness = 0.3;
-        s.add(l);
-    }
-
     image output(800, 600);
     for(int ix = 0; ix < output.width(); ++ix)
     {
         for(int iy = 0; iy < output.height(); ++iy)
         {
-            try
-            {
-                if(ix == 265 && iy == 162)
-                    throw std::runtime_error("break");
-            }
-            catch(const std::exception&)
-            {
-            }
             Eigen::Vector3d start =
                 {
                     -(float(ix) - output.width()/2),

@@ -18,6 +18,7 @@ namespace eos
         Eigen::Vector3d
             closest_intersection(const ray& light_ray) const override;
         Eigen::Vector3d normal(Eigen::Vector3d) const override;
+        void transform(transform_type) override;
     private:
         Eigen::Matrix<double, 3, 3> m_points;
     };

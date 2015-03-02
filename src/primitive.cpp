@@ -1,5 +1,7 @@
 #include "primitive.hpp"
 
+#include "lamp.hpp"
+
 eos::pixel eos::primitive::colour() const
 {
     return pixel(1, 1, 1);
@@ -13,8 +15,8 @@ eos::pixel eos::primitive::diffuse(const lamp& l, const ray& view_ray) const
     if(!intersects(view_ray))
         return eos::pixel(0, 0, 0);
     auto x = closest_intersection(view_ray);
-    auto light_direction = (x - l.centre).normalized();
-    double brightness = (-light_direction).dot(normal(x)) * l.brightness;
+    auto light_direction = (x - l.centre()).normalized();
+    double brightness = (-light_direction).dot(normal(x)) * l.brightness();
     if(brightness < 0)
         brightness = 0;
     if(brightness > 1)
