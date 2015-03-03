@@ -15,11 +15,8 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray) const
     return compute_colour(view_ray, 2);
 }
 
-eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
+std::vector<const eos::primitive*> eos::scene::visible(ray view_ray) const
 {
-    pixel out({0, 0, 0});
-
-    view_ray.set_origin(view_ray.origin() + view_ray.direction());
     auto distance = [this, view_ray](const primitive *p) {
         return (p->closest_intersection(view_ray) - view_ray.origin()).norm();
     };
@@ -45,12 +42,22 @@ eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
             std::remove_if(primitives.begin(), primitives.end(), not_in_line),
             primitives.end()
             );
+    // Sort primitives on the view ray by distance from the camera.
+    std::sort(primitives.begin(), primitives.end(), cmp);
+
+    return primitives;
+}
+
+eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
+{
+    pixel out({0, 0, 0});
+
+    view_ray.set_origin(view_ray.origin() + view_ray.direction());
+
+    std::vector<const primitive*> primitives(visible(view_ray));
 
     if(primitives.size() == 0)
         return out;
-
-    // Sort primitives on the view ray by distance from the camera.
-    std::sort(primitives.begin(), primitives.end(), cmp);
 
     const primitive *closest = primitives.at(0);
     auto intersection = closest->closest_intersection(view_ray);
