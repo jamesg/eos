@@ -1,0 +1,32 @@
+{
+    "lamps": [
+        {
+            "type": "point",
+            "brightness": 0.8,
+            "x": -400,
+            "y": -400,
+            "z": -400
+        },
+        {
+            "type": "point",
+            "brightness": 0.2,
+            "x": 0,
+            "y": -400,
+            "z": 0
+        }
+    ],
+    "primitives": [
+        {
+            "type": "sphere",
+            "x": 0.0,
+            "y": 200.0,
+            "z": 0.0,
+            "radius": 120.0,
+            "reflectivity": 0.8,
+            "r": 0.0,
+            "g": 0.0,
+            "b": 1.0
+        }
+    ]
+}
+
