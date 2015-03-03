@@ -7,6 +7,11 @@ eos::pixel eos::primitive::colour() const
     return pixel(1, 1, 1);
 }
 
+double eos::primitive::reflectivity() const
+{
+    return 0.0;
+}
+
 eos::pixel eos::primitive::diffuse(const lamp& l, const ray& view_ray) const
 {
     // Intensity of diffuse light = direction of light dot normal times

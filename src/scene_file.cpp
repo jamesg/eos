@@ -4,6 +4,7 @@
 
 #include "styx/styx.hpp"
 
+#include "attributes.hpp"
 #include "coloured.hpp"
 #include "material.hpp"
 #include "point_lamp.hpp"
@@ -28,8 +29,12 @@ eos::scene eos::scene_file::get_scene() const
     return out;
 }
 
-void eos::scene_file::load_common(const styx::object& e, void *p)
+void eos::scene_file::load_common(const styx::object& o, attributes *p)
 {
+    if(has_centre *h = dynamic_cast<has_centre*>(p))
+        h->set_centre(
+                {o.copy_double("x"), o.copy_double("y"), o.copy_double("z")}
+                );
 }
 
 std::unique_ptr<eos::lamp> eos::scene_file::load_lamp(
@@ -45,9 +50,6 @@ std::unique_ptr<eos::lamp> eos::scene_file::load_lamp(
         l.reset(new soft_lamp);
     load_common(o, l.get());
     l->set_brightness(o.copy_double("brightness"));
-    l->set_centre(
-            {o.copy_double("x"), o.copy_double("y"), o.copy_double("z")}
-            );
     return std::move(l);
 }
 
@@ -78,16 +80,7 @@ std::unique_ptr<eos::primitive> eos::scene_file::load_primitive(
         t->set_points(points);
     }
     if(sphere *s = dynamic_cast<sphere*>(shape.get()))
-    {
-        s->set_centre(
-                Eigen::Vector3d(
-                    o.copy_double("x"),
-                    o.copy_double("y"),
-                    o.copy_double("z")
-                    )
-                );
         s->set_radius(o.copy_double("radius"));
-    }
     if(coloured *c = dynamic_cast<coloured*>(shape.get()))
         c->set_colour(
                 eos::pixel(

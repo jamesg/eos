@@ -18,11 +18,6 @@ eos::sphere::sphere() :
 {
 }
 
-void eos::sphere::set_centre(Eigen::Vector3d centre)
-{
-    m_centre = centre;
-}
-
 void eos::sphere::set_radius(double radius)
 {
     m_radius = radius;
@@ -32,9 +27,9 @@ bool eos::sphere::intersects(const ray& light_ray) const
 {
     return (
             square(
-                light_ray.direction().dot(light_ray.origin() - m_centre)
+                light_ray.direction().dot(light_ray.origin() - centre())
                 ) -
-            square((light_ray.origin() - m_centre).norm()) +
+            square((light_ray.origin() - centre()).norm()) +
             square(m_radius)
             ) >= 0;
 }
@@ -44,14 +39,14 @@ Eigen::Vector3d eos::sphere::closest_intersection(const ray& light_ray) const
     if(!this->intersects(light_ray))
         throw std::runtime_error("no intersection");
     float d =
-        -(light_ray.direction().dot(light_ray.origin() - m_centre))
+        -(light_ray.direction().dot(light_ray.origin() - centre()))
         -sqrt(
             square(
                 light_ray.direction().dot(
-                    light_ray.origin() - m_centre
+                    light_ray.origin() - centre()
                     )
                 ) -
-            square((light_ray.origin() - m_centre).norm()) +
+            square((light_ray.origin() - centre()).norm()) +
             square(m_radius)
             );
     return light_ray.origin() + d*light_ray.direction();
@@ -59,7 +54,7 @@ Eigen::Vector3d eos::sphere::closest_intersection(const ray& light_ray) const
 
 Eigen::Vector3d eos::sphere::normal(Eigen::Vector3d loc) const
 {
-    return (loc - m_centre).normalized();
+    return (loc - centre()).normalized();
 }
 
 void eos::sphere::transform(transform_type)

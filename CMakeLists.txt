@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Raytracer)
 enable_testing()
 
+find_package(Boost COMPONENTS date_time filesystem random regex system thread)
 find_package(Eigen3)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x")

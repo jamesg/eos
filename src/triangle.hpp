@@ -1,16 +1,19 @@
 #ifndef EOS_TRIANGLE_HPP
 #define EOS_TRIANGLE_HPP
 
+#include "material.hpp"
 #include "primitive.hpp"
 
 namespace eos
 {
-    class triangle : public primitive
+    class triangle : public virtual primitive, public material
     {
     public:
         triangle();
         triangle(Eigen::Matrix<double, 3, 3>);
         triangle(Eigen::Vector3d, Eigen::Vector3d, Eigen::Vector3d);
+
+        using material::reflectivity;
 
         void set_points(Eigen::Matrix3d);
 

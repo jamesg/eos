@@ -6,6 +6,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "attributes.hpp"
 #include "pixel.hpp"
 
 namespace eos
@@ -17,12 +18,13 @@ namespace eos
      * \brief Interface describing a primitive shape that can interact with
      * light rays.
      */
-    class primitive
+    class primitive : public attributes
     {
     public:
         typedef Eigen::Transform<double, 3, Eigen::Projective> transform_type;
 
         virtual pixel colour() const;
+        virtual double reflectivity() const;
         /*!
          * \brief Render a point on the surface under diffuse lighting.
          *

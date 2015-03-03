@@ -16,16 +16,6 @@ void eos::lamp::set_brightness(double brightness)
     m_brightness = brightness;
 }
 
-Eigen::Vector3d eos::lamp::centre() const
-{
-    return m_centre;
-}
-
-void eos::lamp::set_centre(Eigen::Vector3d centre)
-{
-    m_centre = centre;
-}
-
 int eos::lamp::ray_count() const
 {
     return 1;

@@ -9,6 +9,7 @@
 
 namespace eos
 {
+    class attributes;
     class lamp;
     class primitive;
 
@@ -20,7 +21,7 @@ namespace eos
         scene get_scene() const;
 
     private:
-        static void load_common(const styx::object&, void*);
+        static void load_common(const styx::object&, attributes*);
         static std::unique_ptr<lamp> load_lamp(const styx::element&);
         static std::unique_ptr<primitive> load_primitive(const styx::element&);
 

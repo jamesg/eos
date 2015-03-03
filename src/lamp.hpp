@@ -3,17 +3,17 @@
 
 #include <Eigen/Core>
 
+#include "attributes.hpp"
+
 namespace eos
 {
-    class lamp
+    class lamp : public attributes, public has_centre
     {
     public:
         lamp();
 
         double brightness() const;
         void set_brightness(double brightness);
-        Eigen::Vector3d centre() const;
-        void set_centre(Eigen::Vector3d centre);
 
         /*!
          * \brief Select an origin point for a ray starting at this lamp.

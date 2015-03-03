@@ -1,7 +1,6 @@
 #include "scene.hpp"
 
 #include <algorithm>
-#include <iostream>
 
 #include "lamp.hpp"
 #include "ray.hpp"
@@ -11,16 +10,26 @@ eos::pixel eos::scene::background_colour() const
     return pixel({1, 1, 1});
 }
 
-eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
+eos::pixel eos::scene::compute_colour(const ray& view_ray) const
 {
-    auto distance = [this, view_ray](const primitive *s) {
-        return (s->closest_intersection(view_ray) - view_ray.origin()).norm();
+    return compute_colour(view_ray, 10, nullptr);
+}
+
+eos::pixel eos::scene::compute_colour(
+        ray view_ray,
+        int recursions,
+        const primitive *from
+        ) const
+{
+    view_ray.set_origin(view_ray.origin() + view_ray.direction());
+    auto distance = [this, view_ray](const primitive *p) {
+        return (p->closest_intersection(view_ray) - view_ray.origin()).norm();
     };
-    auto cmp = [distance](const primitive *s1, const primitive *s2) {
-        return distance(s1) < distance(s2);
+    auto cmp = [distance](const primitive *p1, const primitive *p2) {
+        return distance(p1) < distance(p2);
     };
-    auto not_in_line = [distance, view_ray](const primitive *s) {
-        return !s->intersects(view_ray);
+    auto not_in_line = [distance, view_ray](const primitive *p) {
+        return !p->intersects(view_ray);
     };
 
     // Set up a view onto all shapes in the scene.
@@ -48,6 +57,9 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
     pixel out({0, 0, 0});
 
     const primitive *closest = primitives.at(0);
+    // Rays should not reflect off the origin object.
+    if(closest == from)
+        return out;
     auto intersection = closest->closest_intersection(view_ray);
 
     // Check if 'shape' intersects 'light_ray' between the light ray origin and
@@ -71,17 +83,16 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
         return (lamp_closest > lamp_shape);
     };
 
-    for(const std::unique_ptr<lamp>& current_lamp_ptr : m_lamps)
+    for(const std::unique_ptr<lamp>& current_lamp : m_lamps)
     {
-        const lamp& current_lamp = *current_lamp_ptr;
-        const int ray_count = current_lamp.ray_count();
+        const int ray_count = current_lamp->ray_count();
         eos::pixel ray_colour(0, 0, 0);
         for(int i = 0; i < ray_count; ++i)
         {
             // lamp -> intersection
             ray light_ray(
-                    current_lamp.centre(),
-                    intersection - current_lamp.centre()
+                    current_lamp->centre(),
+                    intersection - current_lamp->centre()
                     );
 
             // Find objects along the line from the lamp to the object.  If
@@ -94,10 +105,23 @@ eos::pixel eos::scene::compute_colour(const ray& view_ray, int recursions) const
                     std::bind(in_ray, std::placeholders::_1, light_ray)
                     ) == m_primitives.end()
               )
-                ray_colour += closest->diffuse(current_lamp, view_ray);
+                ray_colour += closest->diffuse(*current_lamp, view_ray);
         }
         ray_colour /= ray_count;
         out += ray_colour;
+    }
+
+    if(recursions > 1)
+    {
+        Eigen::Vector3d normal = closest->normal(intersection).normalized();
+        // If the normal is in the wrong direction.
+        if(normal.dot(-view_ray.direction()) < 0)
+            normal = -normal;
+        auto out_ray_dir =
+            normal + (normal - (-view_ray.direction()));
+        ray out_ray(intersection, out_ray_dir);
+        pixel p = compute_colour(out_ray, recursions - 1, closest);
+        out += p * closest->reflectivity();
     }
 
     return out;
