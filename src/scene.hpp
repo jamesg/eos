@@ -18,11 +18,7 @@ namespace eos
         void add(std::unique_ptr<lamp>&&);
         void add(std::unique_ptr<primitive>&&);
     private:
-        pixel compute_colour(
-                ray,
-                int recursions,
-                const primitive *from
-                ) const;
+        pixel compute_colour(ray, int recursions) const;
         pixel background_colour() const;
 
         std::vector<std::unique_ptr<lamp>> m_lamps;

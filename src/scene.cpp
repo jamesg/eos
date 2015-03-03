@@ -12,15 +12,13 @@ eos::pixel eos::scene::background_colour() const
 
 eos::pixel eos::scene::compute_colour(const ray& view_ray) const
 {
-    return compute_colour(view_ray, 10, nullptr);
+    return compute_colour(view_ray, 2);
 }
 
-eos::pixel eos::scene::compute_colour(
-        ray view_ray,
-        int recursions,
-        const primitive *from
-        ) const
+eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
 {
+    pixel out({0, 0, 0});
+
     view_ray.set_origin(view_ray.origin() + view_ray.direction());
     auto distance = [this, view_ray](const primitive *p) {
         return (p->closest_intersection(view_ray) - view_ray.origin()).norm();
@@ -49,17 +47,12 @@ eos::pixel eos::scene::compute_colour(
             );
 
     if(primitives.size() == 0)
-        return background_colour();
+        return out;
 
     // Sort primitives on the view ray by distance from the camera.
     std::sort(primitives.begin(), primitives.end(), cmp);
 
-    pixel out({0, 0, 0});
-
     const primitive *closest = primitives.at(0);
-    // Rays should not reflect off the origin object.
-    if(closest == from)
-        return out;
     auto intersection = closest->closest_intersection(view_ray);
 
     // Check if 'shape' intersects 'light_ray' between the light ray origin and
@@ -120,7 +113,7 @@ eos::pixel eos::scene::compute_colour(
         auto out_ray_dir =
             normal + (normal - (-view_ray.direction()));
         ray out_ray(intersection, out_ray_dir);
-        pixel p = compute_colour(out_ray, recursions - 1, closest);
+        pixel p = compute_colour(out_ray, recursions - 1);
         out += p * closest->reflectivity();
     }
 
