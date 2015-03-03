@@ -29,6 +29,7 @@ namespace eos
         Eigen::Vector3d normal(Eigen::Vector3d) const override;
         void transform(transform_type) override;
     private:
+        double intersection_determinant(const ray&) const;
         double m_radius;
     };
 }

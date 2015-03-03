@@ -39,6 +39,12 @@ SCENARIO("eos::sphere") {
             CHECK(intersection[1] == 0.0);
             CHECK(intersection[2] == 0.0);
         }
+
+        THEN("ray (0, 0, 0) -> (0, 1, 0) does not intersect") {
+            // This ray intersects with the inside surface of the sphere.
+            eos::ray light_ray({0.0, 0.0, 0.0}, {0.0, 1.0, 0.0});
+            REQUIRE(!s.intersects(light_ray));
+        }
     }
 }
 

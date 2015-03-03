@@ -29,11 +29,30 @@ SCENARIO("eos::triangle") {
         }
 
         THEN("line (0.25, 0, 0.25) -> (0, 1, 0) does intersect") {
+            // This line originates inside the triangle.
             eos::ray light_ray(
                     Eigen::Vector3d(0.25, 0.0, 0.25),
                     Eigen::Vector3d(0.0, 1.0, 0.0)
                     );
             REQUIRE(t.intersects(light_ray));
+        }
+
+        THEN("line (0.25, -1, 0.25) -> (0, 1, 0) does intersect") {
+            // This line originates behind the triangle.
+            eos::ray light_ray(
+                    Eigen::Vector3d(0.25, -1.0, 0.25),
+                    Eigen::Vector3d(0.0, 1.0, 0.0)
+                    );
+            REQUIRE(t.intersects(light_ray));
+        }
+
+        THEN("line (0.25, 1, 0.25) -> (0, 1, 0) does not intersect") {
+            // This line originates in front of the triangle.
+            eos::ray light_ray(
+                    Eigen::Vector3d(0.25, 1.0, 0.25),
+                    Eigen::Vector3d(0.0, 1.0, 0.0)
+                    );
+            REQUIRE(!t.intersects(light_ray));
         }
     }
 }

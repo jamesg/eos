@@ -53,6 +53,8 @@ bool eos::triangle::intersects(const ray& light_ray) const
             (light_ray.origin()-p0).dot(n) /
             light_ray.direction().dot(n)
             );
+    if(t < 0.0)
+        return false;
     // x is the point where the light ray intersects the plane.
     const Eigen::Vector3d x = light_ray.origin() + t*light_ray.direction();
 

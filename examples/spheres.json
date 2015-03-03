@@ -3,9 +3,16 @@
         {
             "type": "point",
             "brightness": 0.8,
-            "x": -200,
-            "y": -200,
-            "z": -200
+            "x": -400,
+            "y": -400,
+            "z": -400
+        },
+        {
+            "type": "point",
+            "brightness": 0.2,
+            "x": 0,
+            "y": -400,
+            "z": 0
         }
     ],
     "primitives": [
