@@ -1,9 +1,16 @@
 #include "scene.hpp"
 
 #include <algorithm>
+#include <cstdlib>
 
 #include "lamp.hpp"
 #include "ray.hpp"
+
+eos::scene::scene() :
+    m_distance(3000.0),
+    m_apeture(0.0)
+{
+}
 
 eos::pixel eos::scene::background_colour() const
 {
@@ -67,7 +74,7 @@ eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
     // 'closest'.
     auto in_ray = [&closest](
             const std::unique_ptr<primitive>& shape,
-            ray light_ray
+            const ray& light_ray
             )
     {
         if(!shape->intersects(light_ray) || !closest->intersects(light_ray))
@@ -85,15 +92,14 @@ eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
 
     for(const std::unique_ptr<lamp>& current_lamp : m_lamps)
     {
-        const int ray_count = current_lamp->ray_count();
+        std::vector<Eigen::Vector3d> ray_origins(current_lamp->ray_origin());
+        if(ray_origins.empty())
+            continue;
         eos::pixel ray_colour(0, 0, 0);
-        for(int i = 0; i < ray_count; ++i)
+        for(auto origin : ray_origins)
         {
             // lamp -> intersection
-            ray light_ray(
-                    current_lamp->centre(),
-                    intersection - current_lamp->centre()
-                    );
+            ray light_ray(origin, intersection - origin);
 
             // Find objects along the line from the lamp to the object.  If
             // there are objects along this line, there will be a shadow on the
@@ -107,7 +113,7 @@ eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
               )
                 ray_colour += closest->diffuse(*current_lamp, view_ray);
         }
-        ray_colour /= ray_count;
+        ray_colour /= ray_origins.size();
         out += ray_colour;
     }
 
@@ -135,5 +141,44 @@ void eos::scene::add(std::unique_ptr<lamp>&& l)
 void eos::scene::add(std::unique_ptr<primitive>&& s)
 {
     m_primitives.push_back(std::move(s));
+}
+
+eos::image eos::scene::render(const int width, const int height) const
+{
+    image output(width, height);
+    for(int ix = 0; ix < output.width(); ++ix)
+    {
+        for(int iy = 0; iy < output.height(); ++iy)
+        {
+            pixel c({0.0, 0.0, 0.0});
+            for(int ir = 0; ir < 4; ++ir)
+            {
+                Eigen::Vector3d screen{
+                    (float(ix) - output.width()/2),
+                    -200,
+                    (float(iy) - output.height()/2)
+                };
+                Eigen::Vector3d apeture{
+                    m_apeture * (ir/2 + ((double)std::rand()/RAND_MAX) - 1.0),
+                    -m_distance,
+                    m_apeture * (ir%2 + ((double)std::rand()/RAND_MAX) - 1.0),
+                };
+                ray view_ray(apeture, screen - apeture);
+                c += compute_colour(view_ray) / 4;
+            }
+            output.set({ix, iy}, c);
+        }
+    }
+    return output;
+}
+
+void eos::scene::set_camera_distance(double distance)
+{
+    m_distance = distance;
+}
+
+void eos::scene::set_camera_apeture(double apeture)
+{
+    m_apeture = apeture;
 }
 

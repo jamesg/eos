@@ -16,13 +16,14 @@ namespace eos
         /*!
          * \brief Cast a ray from a random point on the lamp's surface.
          */
-        Eigen::Vector3d ray_origin() const override;
-        int ray_count() const override;
+        std::vector<Eigen::Vector3d> ray_origin() const override;
 
         Eigen::Vector3d normal() const;
         void set_normal(Eigen::Vector3d);
+        void set_softness(double);
     private:
         Eigen::Vector3d m_normal;
+        double m_softness;
     };
 }
 

@@ -22,6 +22,8 @@ eos::scene_file eos::scene_file::from_file(const std::string& filename)
 eos::scene eos::scene_file::get_scene() const
 {
     scene out;
+    out.set_camera_distance(copy_double("distance"));
+    out.set_camera_apeture(copy_double("apeture"));
     for(const styx::element& primitive_e : primitives())
         out.add(scene_file::load_primitive(primitive_e));
     for(const styx::element& lamp_e : lamps())
@@ -50,6 +52,9 @@ std::unique_ptr<eos::lamp> eos::scene_file::load_lamp(
         l.reset(new soft_lamp);
     load_common(o, l.get());
     l->set_brightness(o.copy_double("brightness"));
+
+    if(soft_lamp *s = dynamic_cast<soft_lamp*>(l.get()))
+        s->set_softness(o.copy_double("softness"));
     return std::move(l);
 }
 

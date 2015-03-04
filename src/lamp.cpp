@@ -16,8 +16,3 @@ void eos::lamp::set_brightness(double brightness)
     m_brightness = brightness;
 }
 
-int eos::lamp::ray_count() const
-{
-    return 1;
-}
-

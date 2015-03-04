@@ -16,21 +16,13 @@ namespace eos
         void set_brightness(double brightness);
 
         /*!
-         * \brief Select an origin point for a ray starting at this lamp.
-         *
-         * \note Depending on the type of lamp, this point may change between
-         * invocations.
-         */
-        virtual Eigen::Vector3d ray_origin() const = 0;
-
-        /*!
-         * \brief Recommended number of rays to cast from this lamp.
+         * \brief Select a set of origin points for this lamp.
          *
          * Some lamps use multiple rays to provide softer lighting.  The number
          * of rays should be at least 1.  More rays require more processing
          * time, a sensible maximum is 100.
          */
-        virtual int ray_count() const;
+        virtual std::vector<Eigen::Vector3d> ray_origin() const = 0;
     private:
         double m_brightness;
         Eigen::Vector3d m_centre;

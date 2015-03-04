@@ -76,25 +76,7 @@ int eos::main(int argc, const char **argv)
     }
 
     scene s = scene_file::from_file(infile).get_scene();
-
-    image output(width, height);
-    for(int ix = 0; ix < output.width(); ++ix)
-    {
-        for(int iy = 0; iy < output.height(); ++iy)
-        {
-            Eigen::Vector3d start =
-                {
-                    -(float(ix) - output.width()/2),
-                    -1000,
-                    -(float(iy) - output.height()/2)
-                };
-            ray view_ray(
-                start,
-                Eigen::Vector3d{0, -500, 0} - start
-            );
-            output.set({ix, iy}, s.compute_colour(view_ray));
-        }
-    }
+    image output(s.render(width, height));
 
     std::ofstream os(outfile);
     os << output;

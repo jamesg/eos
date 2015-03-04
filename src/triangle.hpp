@@ -1,12 +1,13 @@
 #ifndef EOS_TRIANGLE_HPP
 #define EOS_TRIANGLE_HPP
 
+#include "coloured.hpp"
 #include "material.hpp"
 #include "primitive.hpp"
 
 namespace eos
 {
-    class triangle : public virtual primitive, public material
+    class triangle : public virtual primitive, public coloured, public material
     {
     public:
         triangle();

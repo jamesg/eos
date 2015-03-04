@@ -12,7 +12,7 @@ namespace eos
     class point_lamp : public lamp
     {
     public:
-        Eigen::Vector3d ray_origin() const override;
+        std::vector<Eigen::Vector3d> ray_origin() const override;
     };
 }
 

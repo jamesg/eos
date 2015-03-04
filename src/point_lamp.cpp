@@ -1,7 +1,7 @@
 #include "point_lamp.hpp"
 
-Eigen::Vector3d eos::point_lamp::ray_origin() const
+std::vector<Eigen::Vector3d> eos::point_lamp::ray_origin() const
 {
-    return centre();
+    return std::vector<Eigen::Vector3d>{centre()};
 }
 
