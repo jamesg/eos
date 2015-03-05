@@ -18,11 +18,8 @@ namespace eos
          */
         std::vector<Eigen::Vector3d> ray_origin() const override;
 
-        Eigen::Vector3d normal() const;
-        void set_normal(Eigen::Vector3d);
         void set_softness(double);
     private:
-        Eigen::Vector3d m_normal;
         double m_softness;
     };
 }
