@@ -4,7 +4,6 @@
 #include "attributes.hpp"
 #include "coloured.hpp"
 #include "material.hpp"
-#include "pixel.hpp"
 #include "primitive.hpp"
 
 namespace eos

@@ -3,7 +3,7 @@
 
 #include <ostream>
 
-#include "pixel.hpp"
+#include "colour.hpp"
 
 namespace eos
 {
@@ -15,10 +15,10 @@ namespace eos
         int width() const;
         int height() const;
 
-        void set(Eigen::Vector2i loc, pixel p);
+        void set(Eigen::Vector2i, colour::rgb);
         friend std::ostream& operator<<(std::ostream&, const image&);
     private:
-        Eigen::Matrix<pixel, Eigen::Dynamic, Eigen::Dynamic> m_data;
+        Eigen::Matrix<colour::rgb, Eigen::Dynamic, Eigen::Dynamic> m_data;
     };
     std::ostream& operator<<(std::ostream&, const eos::image&);
 }

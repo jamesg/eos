@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdlib>
 
+#include "colour.hpp"
 #include "lamp.hpp"
 #include "ray.hpp"
 
@@ -12,14 +13,19 @@ eos::scene::scene() :
 {
 }
 
-eos::pixel eos::scene::background_colour() const
+eos::colour::rgb eos::scene::background_colour() const
 {
-    return pixel({1, 1, 1});
+    return colour::rgb(1, 0, 1);
 }
 
-eos::pixel eos::scene::compute_colour(const ray& view_ray) const
+eos::colour::rgb eos::scene::compute_colour(const ray& view_ray) const
 {
-    return compute_colour(view_ray, 2);
+    return colour::to_rgb(
+            colour::over(
+                compute_colour(view_ray, 2),
+                colour::to_rgba(background_colour())
+                )
+            );
 }
 
 std::vector<const eos::primitive*> eos::scene::visible(ray view_ray) const
@@ -55,9 +61,9 @@ std::vector<const eos::primitive*> eos::scene::visible(ray view_ray) const
     return primitives;
 }
 
-eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
+eos::colour::rgba eos::scene::compute_colour(ray view_ray, int recursions) const
 {
-    pixel out({0, 0, 0});
+    colour::rgba out(0, 0, 0, 0);
 
     view_ray.set_origin(view_ray.origin() + view_ray.direction());
 
@@ -95,7 +101,7 @@ eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
         std::vector<Eigen::Vector3d> ray_origins(current_lamp->ray_origin());
         if(ray_origins.empty())
             continue;
-        eos::pixel ray_colour(0, 0, 0);
+        colour::rgba ray_colour(0, 0, 0, 0);
         for(auto origin : ray_origins)
         {
             // lamp -> intersection
@@ -126,7 +132,7 @@ eos::pixel eos::scene::compute_colour(ray view_ray, int recursions) const
         auto out_ray_dir =
             normal + (normal - (-view_ray.direction()));
         ray out_ray(intersection, out_ray_dir);
-        pixel p = compute_colour(out_ray, recursions - 1);
+        colour::rgba p = compute_colour(out_ray, recursions - 1);
         out += p * closest->reflectivity();
     }
 
@@ -150,21 +156,22 @@ eos::image eos::scene::render(const int width, const int height) const
     {
         for(int iy = 0; iy < output.height(); ++iy)
         {
-            pixel c({0.0, 0.0, 0.0});
-            for(int ir = 0; ir < 4; ++ir)
+            colour::rgb c(0, 0, 0);
+            for(int ir = 0; ir < 16; ++ir)
             {
                 Eigen::Vector3d screen{
                     (float(ix) - output.width()/2),
                     -200,
                     (float(iy) - output.height()/2)
                 };
+                const double RANDOMNESS = 0.3;
                 Eigen::Vector3d apeture{
-                    m_apeture * (ir/2 + ((double)std::rand()/RAND_MAX) - 1.0),
+                    m_apeture * (ir/4 - 1.5 + ((double)std::rand()/RAND_MAX)*RANDOMNESS - (RANDOMNESS/2)),
                     -m_distance,
-                    m_apeture * (ir%2 + ((double)std::rand()/RAND_MAX) - 1.0),
+                    m_apeture * (ir%4 - 1.5 + ((double)std::rand()/RAND_MAX)*RANDOMNESS - (RANDOMNESS/2)),
                 };
                 ray view_ray(apeture, screen - apeture);
-                c += compute_colour(view_ray) / 4;
+                c += compute_colour(view_ray) / 16;
             }
             output.set({ix, iy}, c);
         }

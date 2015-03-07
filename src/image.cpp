@@ -15,7 +15,7 @@ int eos::image::height() const
     return m_data.rows();
 }
 
-void eos::image::set(Eigen::Vector2i loc, pixel p)
+void eos::image::set(Eigen::Vector2i loc, colour::rgb p)
 {
     m_data(loc[1], loc[0]) = p;
 }

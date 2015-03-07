@@ -7,7 +7,7 @@
 #include <Eigen/Geometry>
 
 #include "attributes.hpp"
-#include "pixel.hpp"
+#include "colour.hpp"
 
 namespace eos
 {
@@ -23,14 +23,14 @@ namespace eos
     public:
         typedef Eigen::Transform<double, 3, Eigen::Projective> transform_type;
 
-        virtual pixel colour() const;
+        virtual colour::rgba colour() const;
         virtual double reflectivity() const;
         /*!
          * \brief Render a point on the surface under diffuse lighting.
          *
          * Brightness is computed by Lambertian reflectance.
          */
-        pixel diffuse(const lamp&, const ray& view_ray) const;
+        colour::rgba diffuse(const lamp&, const ray& view_ray) const;
         /*!
          * \brief Check whether a light ray intersects with the object.
          */

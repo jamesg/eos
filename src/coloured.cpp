@@ -1,21 +1,21 @@
 #include "coloured.hpp"
 
 eos::coloured::coloured() :
-    m_colour({0.0, 0.0, 0.0})
+    m_colour(0.0, 0.0, 0.0, 0.0)
 {
 }
 
-eos::coloured::coloured(const pixel colour) :
+eos::coloured::coloured(const colour::rgba colour) :
     m_colour(colour)
 {
 }
 
-eos::pixel eos::coloured::colour() const
+eos::colour::rgba eos::coloured::colour() const
 {
     return m_colour;
 }
 
-void eos::coloured::set_colour(const pixel colour)
+void eos::coloured::set_colour(const colour::rgba colour)
 {
     m_colour = colour;
 }

@@ -3,8 +3,8 @@
 
 #include <memory>
 
+#include "colour.hpp"
 #include "image.hpp"
-#include "pixel.hpp"
 #include "primitive.hpp"
 
 namespace eos
@@ -19,7 +19,7 @@ namespace eos
         /*!
          * \brief Compute the final colour for the given view ray.
          */
-        pixel compute_colour(const ray&) const;
+        colour::rgb compute_colour(const ray&) const;
 
         /*!
          * \brief Add a lamp to the scene.  The scene takes ownership of the
@@ -41,8 +41,8 @@ namespace eos
          * ordered by distance from the origin of the view ray.
          */
         std::vector<const primitive*> visible(ray) const;
-        pixel compute_colour(ray, int recursions) const;
-        pixel background_colour() const;
+        colour::rgba compute_colour(ray, int recursions) const;
+        colour::rgb background_colour() const;
 
         std::vector<std::unique_ptr<lamp>> m_lamps;
         std::vector<std::unique_ptr<primitive>> m_primitives;

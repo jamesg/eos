@@ -22,8 +22,8 @@ eos::scene_file eos::scene_file::from_file(const std::string& filename)
 eos::scene eos::scene_file::get_scene() const
 {
     scene out;
-    out.set_camera_distance(copy_double("distance"));
-    out.set_camera_apeture(copy_double("apeture"));
+    out.set_camera_distance(copy_double("distance", 2000.0));
+    out.set_camera_apeture(copy_double("apeture", 0.0));
     for(const styx::element& primitive_e : primitives())
         out.add(scene_file::load_primitive(primitive_e));
     for(const styx::element& lamp_e : lamps())
@@ -51,7 +51,7 @@ std::unique_ptr<eos::lamp> eos::scene_file::load_lamp(
     if(o.copy_string("type") == "soft")
         l.reset(new soft_lamp);
     load_common(o, l.get());
-    l->set_brightness(o.copy_double("brightness"));
+    l->set_brightness(o.copy_double("brightness", 1.0));
 
     if(soft_lamp *s = dynamic_cast<soft_lamp*>(l.get()))
         s->set_softness(o.copy_double("softness"));
@@ -85,13 +85,14 @@ std::unique_ptr<eos::primitive> eos::scene_file::load_primitive(
         t->set_points(points);
     }
     if(sphere *s = dynamic_cast<sphere*>(shape.get()))
-        s->set_radius(o.copy_double("radius"));
+        s->set_radius(o.copy_double("radius", 100.0));
     if(coloured *c = dynamic_cast<coloured*>(shape.get()))
         c->set_colour(
-                eos::pixel(
-                    o.copy_double("r"),
-                    o.copy_double("g"),
-                    o.copy_double("b")
+                eos::colour::rgba(
+                    o.copy_double("r", 0.5),
+                    o.copy_double("g", 0.5),
+                    o.copy_double("b", 0.5),
+                    1.0
                     )
                 );
     if(material *m = dynamic_cast<material*>(shape.get()))

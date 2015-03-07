@@ -9,13 +9,13 @@ namespace eos
     {
     public:
         coloured();
-        coloured(const pixel colour);
+        coloured(const colour::rgba colour);
 
-        pixel colour() const override;
-        void set_colour(const pixel colour);
+        colour::rgba colour() const override;
+        void set_colour(const colour::rgba colour);
 
     private:
-        pixel m_colour;
+        colour::rgba m_colour;
     };
 }
 
