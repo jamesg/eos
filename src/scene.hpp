@@ -19,7 +19,7 @@ namespace eos
         /*!
          * \brief Compute the final colour for the given view ray.
          */
-        colour::rgb compute_colour(const ray&) const;
+        colour::rgba compute_colour(const ray&) const;
 
         /*!
          * \brief Add a lamp to the scene.  The scene takes ownership of the

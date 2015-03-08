@@ -6,6 +6,7 @@
 #include "colour.hpp"
 #include "lamp.hpp"
 #include "ray.hpp"
+#include "sampling.hpp"
 
 eos::scene::scene() :
     m_distance(3000.0),
@@ -18,13 +19,11 @@ eos::colour::rgb eos::scene::background_colour() const
     return colour::rgb(1, 0, 1);
 }
 
-eos::colour::rgb eos::scene::compute_colour(const ray& view_ray) const
+eos::colour::rgba eos::scene::compute_colour(const ray& view_ray) const
 {
-    return colour::to_rgb(
-            colour::over(
-                compute_colour(view_ray, 2),
-                colour::to_rgba(background_colour())
-                )
+    return colour::over(
+            compute_colour(view_ray, 2),
+            colour::to_rgba(background_colour())
             );
 }
 
@@ -63,14 +62,12 @@ std::vector<const eos::primitive*> eos::scene::visible(ray view_ray) const
 
 eos::colour::rgba eos::scene::compute_colour(ray view_ray, int recursions) const
 {
-    colour::rgba out(0, 0, 0, 0);
-
     view_ray.set_origin(view_ray.origin() + view_ray.direction());
 
     std::vector<const primitive*> primitives(visible(view_ray));
 
     if(primitives.size() == 0)
-        return out;
+        return colour::rgba(0.0, 0.0, 0.0, 0.0);
 
     const primitive *closest = primitives.at(0);
     auto intersection = closest->closest_intersection(view_ray);
@@ -96,47 +93,61 @@ eos::colour::rgba eos::scene::compute_colour(ray view_ray, int recursions) const
         return (lamp_closest > lamp_shape);
     };
 
-    for(const std::unique_ptr<lamp>& current_lamp : m_lamps)
-    {
-        std::vector<Eigen::Vector3d> ray_origins(current_lamp->ray_origin());
-        if(ray_origins.empty())
-            continue;
-        colour::rgba ray_colour(0, 0, 0, 0);
-        for(auto origin : ray_origins)
+    return blend(
+        m_lamps.begin(),
+        m_lamps.end(),
+        [this, closest, &in_ray, &intersection, &view_ray, recursions](
+            const std::unique_ptr<lamp>& current_lamp
+            )
         {
-            // lamp -> intersection
-            ray light_ray(origin, intersection - origin);
+            std::vector<Eigen::Vector3d> ray_origins(current_lamp->ray_origin());
+            if(ray_origins.empty())
+                return colour::rgba(0.0, 0.0, 0.0, 1.0);
 
-            // Find objects along the line from the lamp to the object.  If
-            // there are objects along this line, there will be a shadow on the
-            // object.
-            if(
-                std::find_if(
-                    m_primitives.begin(),
-                    m_primitives.end(),
-                    std::bind(in_ray, std::placeholders::_1, light_ray)
-                    ) == m_primitives.end()
-              )
-                ray_colour += closest->diffuse(*current_lamp, view_ray);
+            colour::rgba reflected(0.0, 0.0, 0.0, 0.0);
+            if(recursions > 1)
+            {
+                Eigen::Vector3d normal =
+                    closest->normal(intersection).normalized();
+                // If the normal is in the wrong direction.
+                if(normal.dot(-view_ray.direction()) < 0)
+                    normal = -normal;
+                auto out_ray_dir =
+                    normal + (normal - (-view_ray.direction()));
+                ray out_ray(intersection, out_ray_dir);
+                colour::rgba p = compute_colour(out_ray, recursions - 1);
+                reflected = p;// * closest->reflectivity();
+            }
+
+            return colour::over(
+                reflected,
+                blend(
+                    ray_origins.begin(),
+                    ray_origins.end(),
+                    [this, closest, &current_lamp, &in_ray, &intersection, &view_ray](
+                        const Eigen::Vector3d& origin
+                        )
+                    {
+                        // lamp -> intersection
+                        ray light_ray(origin, intersection - origin);
+
+                        // Find objects along the line from the lamp to the object.
+                        // If there are objects along this line, there will be a
+                        // shadow on the object.
+                        return (
+                            std::find_if(
+                                m_primitives.begin(),
+                                m_primitives.end(),
+                                std::bind(in_ray, std::placeholders::_1, light_ray)
+                                ) == m_primitives.end()
+                          )?
+                            colour::to_rgba(closest->diffuse(*current_lamp, view_ray)):
+                            colour::rgba(0.0, 0.0, 0.0, 1.0);
+                    }
+                    )
+                );
         }
-        ray_colour /= ray_origins.size();
-        out += ray_colour;
-    }
-
-    if(recursions > 1)
-    {
-        Eigen::Vector3d normal = closest->normal(intersection).normalized();
-        // If the normal is in the wrong direction.
-        if(normal.dot(-view_ray.direction()) < 0)
-            normal = -normal;
-        auto out_ray_dir =
-            normal + (normal - (-view_ray.direction()));
-        ray out_ray(intersection, out_ray_dir);
-        colour::rgba p = compute_colour(out_ray, recursions - 1);
-        out += p * closest->reflectivity();
-    }
-
-    return out;
+        );
 }
 
 void eos::scene::add(std::unique_ptr<lamp>&& l)
@@ -156,24 +167,28 @@ eos::image eos::scene::render(const int width, const int height) const
     {
         for(int iy = 0; iy < output.height(); ++iy)
         {
-            colour::rgb c(0, 0, 0);
-            for(int ir = 0; ir < 16; ++ir)
-            {
-                Eigen::Vector3d screen{
-                    (float(ix) - output.width()/2),
-                    -200,
-                    (float(iy) - output.height()/2)
-                };
-                const double RANDOMNESS = 0.3;
-                Eigen::Vector3d apeture{
-                    m_apeture * (ir/4 - 1.5 + ((double)std::rand()/RAND_MAX)*RANDOMNESS - (RANDOMNESS/2)),
-                    -m_distance,
-                    m_apeture * (ir%4 - 1.5 + ((double)std::rand()/RAND_MAX)*RANDOMNESS - (RANDOMNESS/2)),
-                };
-                ray view_ray(apeture, screen - apeture);
-                c += compute_colour(view_ray) / 16;
-            }
-            output.set({ix, iy}, c);
+            Eigen::Vector3d screen{
+                double(ix - output.width()/2),
+                -200,
+                double(iy - output.height()/2)
+            };
+            const double RANDOMNESS = 1.0;
+            std::vector<Eigen::Vector2d> samples =
+                sample16(m_apeture, RANDOMNESS);
+            colour::rgba c = eos::blend(
+                    samples.begin(),
+                    samples.end(),
+                    [this, screen](const Eigen::Vector2d& sample) {
+                        Eigen::Vector3d apeture{
+                            sample[0],
+                            -m_distance,
+                            sample[1]
+                        };
+                        ray view_ray(apeture, screen - apeture);
+                        return compute_colour(view_ray);
+                    }
+                    );
+            output.set({ix, iy}, colour::to_rgb(c));
         }
     }
     return output;

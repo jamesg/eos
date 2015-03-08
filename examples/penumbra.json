@@ -1,11 +1,11 @@
 {
     "apeture": 0.0,
-    "distance": 4000.0,
+    "distance": 2000.0,
     "lamps": [
         {
             "type": "soft",
-            "brightness": 0.8,
-            "softness": 20.0,
+            "brightness": 1.8,
+            "softness": 10.0,
             "x": -400,
             "y": -400,
             "z": 0
@@ -19,16 +19,6 @@
         }
     ],
     "primitives": [
-        {
-            "type": "sphere",
-            "x": -400,
-            "y": -400,
-            "z": 0,
-            "radius": 40,
-            "r": 1.0,
-            "g": 0.0,
-            "b": 0.0
-        },
         {
             "type": "sphere",
             "x": -250.0,

@@ -1,8 +1,11 @@
 #include "soft_lamp.hpp"
 
+#include <algorithm>
 #include <cstdlib>
 
 #include <Eigen/Geometry>
+
+#include "sampling.hpp"
 
 eos::soft_lamp::soft_lamp() :
     m_softness(4.0)
@@ -11,18 +14,18 @@ eos::soft_lamp::soft_lamp() :
 
 std::vector<Eigen::Vector3d> eos::soft_lamp::ray_origin() const
 {
+    const double RANDOMNESS = 1.0;
+    std::vector<Eigen::Vector3d> samples(sample8(m_softness, RANDOMNESS));
     std::vector<Eigen::Vector3d> origins;
-    for(int i = 0; i < 8; ++i)
-    {
-        origins.push_back(
-            Eigen::Translation<double, 3>(centre()) *
-            Eigen::Vector3d{
-                m_softness * (i/4 + ((double)std::rand()/RAND_MAX) - 1.0),
-                m_softness * ((i%4)/2 + ((double)std::rand()/RAND_MAX) - 1.0),
-                m_softness * (i%2 + ((double)std::rand()/RAND_MAX) - 1.0)
+    Eigen::Translation<double, 3> translation(centre());
+    std::transform(
+            samples.begin(),
+            samples.end(),
+            std::back_inserter(origins),
+            [translation](const Eigen::Vector3d& origin) {
+                return translation * origin;
             }
             );
-    }
     return origins;
 }
 

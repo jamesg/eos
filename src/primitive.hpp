@@ -30,7 +30,7 @@ namespace eos
          *
          * Brightness is computed by Lambertian reflectance.
          */
-        colour::rgba diffuse(const lamp&, const ray& view_ray) const;
+        colour::rgb diffuse(const lamp&, const ray& view_ray) const;
         /*!
          * \brief Check whether a light ray intersects with the object.
          */

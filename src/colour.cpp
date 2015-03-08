@@ -26,9 +26,11 @@ eos::colour::rgba eos::colour::over(const rgba a, const rgba b)
 
 eos::colour::rgba eos::colour::over_assoc(const rgba a, const rgba b)
 {
+    if(a[3] == 0.0 && b[3] == 0.0)
+        return colour::rgba(0.0, 0.0, 0.0, 0.0);
     rgba out;
     out <<
-        (1.0 / a[3]) * (
+        (1.0 / (a[3] + b[3] * (1 - a[3]))) * (
                 a.block<3, 1>(0, 0) * a[3] +
                 b.block<3, 1>(0, 0) * b[3] * (1 - a[3])
                 ),
